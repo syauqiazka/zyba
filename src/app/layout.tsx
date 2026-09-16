@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Sidebar from "@/components/Sidebar";
+import ClientLayout from "./ClientLayout";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,12 +16,7 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body>
-        <div className="flex">
-          <Sidebar />
-          <main className="flex-1 max-w-[1280px] mx-auto px-10 py-8">
-            {children}
-          </main>
-        </div>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );

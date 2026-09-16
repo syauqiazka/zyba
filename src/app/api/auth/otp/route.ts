@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateOTP, verifyOTP, sendOTPEmail } from "@/lib/emailService";
+import { generateOTP, verifyOTP } from "@/lib/emailService";
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,12 +12,15 @@ export async function POST(req: NextRequest) {
     };
 
     if (!email) {
-      return NextResponse.json({ error: "Alamat email wajib diisi." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Alamat email wajib diisi." },
+        { status: 400 }
+      );
     }
 
     if (action === "REQUEST") {
       const generatedCode = generateOTP(email);
-      await sendOTPEmail(email, generatedCode);
+      // In production: await sendOTPEmail(email, generatedCode);
 
       return NextResponse.json({
         success: true,
@@ -29,7 +32,10 @@ export async function POST(req: NextRequest) {
 
     if (action === "VERIFY") {
       if (!otp) {
-        return NextResponse.json({ error: "Kode OTP wajib diisi." }, { status: 400 });
+        return NextResponse.json(
+          { error: "Kode OTP wajib diisi." },
+          { status: 400 }
+        );
       }
 
       const result = verifyOTP(email, otp);
@@ -39,12 +45,16 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: "Verifikasi OTP berhasil. Akun ZYBA Anda telah aktif!",
+        message: "Verifikasi OTP berhasil. Silakan lengkapi pendaftaran.",
+        otpVerified: true,
       });
     }
 
     return NextResponse.json({ error: "Action tidak valid." }, { status: 400 });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || "Internal server error" },
+      { status: 500 }
+    );
   }
 }

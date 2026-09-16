@@ -51,149 +51,227 @@ export default function SettingsPage() {
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: Profile & Account Details */}
-        <div className="lg:col-span-7 glass-card rounded-3xl p-7 border border-brown-900/10 flex flex-col gap-6 bg-white">
-          <h2 className="font-display text-lg font-bold text-brown-900 border-b border-brown-900/10 pb-3">
-            1. Profil Pengguna
-          </h2>
-
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-green-500 text-white font-display font-extrabold flex items-center justify-center text-xl shadow-md">
-              AL
-            </div>
-            <div>
-              <span className="text-sm font-bold text-brown-900 block">{name}</span>
-              <span className="text-xs text-brown-700 block">{email}</span>
-              <span className="text-[10px] bg-orange-100 text-orange-500 font-bold px-2 py-0.5 rounded-full inline-block mt-1">
-                Zyba Plus Active
-              </span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-bold text-brown-900">Nama Lengkap:</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full mt-1 bg-cream/50 rounded-2xl border border-brown-900/10 px-4 py-3 text-xs text-brown-900 font-bold focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-bold text-brown-900">Email:</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full mt-1 bg-cream/50 rounded-2xl border border-brown-900/10 px-4 py-3 text-xs text-brown-900 font-bold focus:outline-none"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-bold text-brown-900">Nomor HP:</label>
-              <input
-                type="text"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full mt-1 bg-cream/50 rounded-2xl border border-brown-900/10 px-4 py-3 text-xs text-brown-900 font-bold focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-bold text-brown-900">Lokasi / Kota:</label>
-              <input
-                type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="w-full mt-1 bg-cream/50 rounded-2xl border border-brown-900/10 px-4 py-3 text-xs text-brown-900 font-bold focus:outline-none"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs font-bold text-brown-900">Bio Singkat:</label>
-            <textarea
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              rows={2}
-              className="w-full mt-1 bg-cream/50 rounded-2xl border border-brown-900/10 p-3 text-xs text-brown-900 font-bold focus:outline-none"
-            />
-          </div>
-        </div>
+        <ProfileSection
+          name={name}
+          email={email}
+          phone={phone}
+          location={location}
+          bio={bio}
+          onNameChange={setName}
+          onEmailChange={setEmail}
+          onPhoneChange={setPhone}
+          onLocationChange={setLocation}
+          onBioChange={setBio}
+        />
 
         {/* Right Column: AI Style & Security Toggles */}
-        <div className="lg:col-span-5 flex flex-col gap-6">
-          {/* Zyba AI Preference */}
-          <div className="glass-card rounded-3xl p-6 border border-brown-900/10 flex flex-col gap-4 bg-white">
-            <h3 className="font-display text-base font-bold text-brown-900 border-b border-brown-900/10 pb-2">
-              2. Preferensi Zyba Companion
-            </h3>
+        <SettingsToggles
+          commStyle={commStyle}
+          onCommStyleChange={setCommStyle}
+          notifChatbot={notifChatbot}
+          onNotifChatbotChange={setNotifChatbot}
+          notifWellness={notifWellness}
+          onNotifWellnessChange={setNotifWellness}
+          notifCommunity={notifCommunity}
+          onNotifCommunityChange={setNotifCommunity}
+          fingerprintEnabled={fingerprintEnabled}
+          onFingerprintChange={setFingerprintEnabled}
+        />
+      </div>
+    </div>
+  );
+}
 
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-bold text-brown-900">Gaya Bahasa AI Chatbot:</label>
-              {(["CASUAL", "FORMAL", "FUN"] as const).map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setCommStyle(s)}
-                  className={`p-3 rounded-2xl text-xs font-bold border transition-colors flex items-center justify-between ${
-                    commStyle === s
-                      ? "bg-brown-900 text-white border-brown-900"
-                      : "bg-cream text-brown-900 border-brown-900/10 hover:border-orange-500"
-                  }`}
-                >
-                  <span>{s}</span>
-                  {commStyle === s && <span>✓</span>}
-                </button>
-              ))}
-            </div>
-          </div>
+// --- Extracted Components ---
 
-          {/* Security & Notification Preferences */}
-          <div className="glass-card rounded-3xl p-6 border border-brown-900/10 flex flex-col gap-4 bg-white">
-            <h3 className="font-display text-base font-bold text-brown-900 border-b border-brown-900/10 pb-2">
-              3. Keamanan & Notifikasi
-            </h3>
+function ProfileSection({
+  name,
+  email,
+  phone,
+  location,
+  bio,
+  onNameChange,
+  onEmailChange,
+  onPhoneChange,
+  onLocationChange,
+  onBioChange,
+}: {
+  name: string;
+  email: string;
+  phone: string;
+  location: string;
+  bio: string;
+  onNameChange: (v: string) => void;
+  onEmailChange: (v: string) => void;
+  onPhoneChange: (v: string) => void;
+  onLocationChange: (v: string) => void;
+  onBioChange: (v: string) => void;
+}) {
+  return (
+    <div className="lg:col-span-7 glass-card rounded-3xl p-7 border border-brown-900/10 flex flex-col gap-6 bg-white">
+      <h2 className="font-display text-lg font-bold text-brown-900 border-b border-brown-900/10 pb-3">
+        1. Profil Pengguna
+      </h2>
 
-            <div className="flex flex-col gap-3 text-xs text-brown-900">
-              <label className="flex items-center justify-between cursor-pointer">
-                <span>Otensifikasi Biometrik / Fingerprint</span>
-                <input
-                  type="checkbox"
-                  checked={fingerprintEnabled}
-                  onChange={(e) => setFingerprintEnabled(e.target.checked)}
-                  className="accent-green-500"
-                />
-              </label>
-              <label className="flex items-center justify-between cursor-pointer">
-                <span>Notifikasi Chat Companion</span>
-                <input
-                  type="checkbox"
-                  checked={notifChatbot}
-                  onChange={(e) => setNotifChatbot(e.target.checked)}
-                  className="accent-green-500"
-                />
-              </label>
-              <label className="flex items-center justify-between cursor-pointer">
-                <span>Pengingat Mood Check-In & Tidur</span>
-                <input
-                  type="checkbox"
-                  checked={notifWellness}
-                  onChange={(e) => setNotifWellness(e.target.checked)}
-                  className="accent-green-500"
-                />
-              </label>
-              <label className="flex items-center justify-between cursor-pointer">
-                <span>Notifikasi Aktivitas Komunitas</span>
-                <input
-                  type="checkbox"
-                  checked={notifCommunity}
-                  onChange={(e) => setNotifCommunity(e.target.checked)}
-                  className="accent-green-500"
-                />
-              </label>
-            </div>
-          </div>
+      <div className="flex items-center gap-4">
+        <div className="w-16 h-16 rounded-full bg-green-500 text-white font-display font-extrabold flex items-center justify-center text-xl shadow-md">
+          AL
+        </div>
+        <div>
+          <span className="text-sm font-bold text-brown-900 block">{name}</span>
+          <span className="text-xs text-brown-700 block">{email}</span>
+          <span className="text-[10px] bg-orange-100 text-orange-500 font-bold px-2 py-0.5 rounded-full inline-block mt-1">
+            Zyba Plus Active
+          </span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="text-xs font-bold text-brown-900">Nama Lengkap:</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => onNameChange(e.target.value)}
+            className="w-full mt-1 bg-cream/50 rounded-2xl border border-brown-900/10 px-4 py-3 text-xs text-brown-900 font-bold focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-bold text-brown-900">Email:</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => onEmailChange(e.target.value)}
+            className="w-full mt-1 bg-cream/50 rounded-2xl border border-brown-900/10 px-4 py-3 text-xs text-brown-900 font-bold focus:outline-none"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="text-xs font-bold text-brown-900">Nomor HP:</label>
+          <input
+            type="text"
+            value={phone}
+            onChange={(e) => onPhoneChange(e.target.value)}
+            className="w-full mt-1 bg-cream/50 rounded-2xl border border-brown-900/10 px-4 py-3 text-xs text-brown-900 font-bold focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-bold text-brown-900">Lokasi / Kota:</label>
+          <input
+            type="text"
+            value={location}
+            onChange={(e) => onLocationChange(e.target.value)}
+            className="w-full mt-1 bg-cream/50 rounded-2xl border border-brown-900/10 px-4 py-3 text-xs text-brown-900 font-bold focus:outline-none"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="text-xs font-bold text-brown-900">Bio Singkat:</label>
+        <textarea
+          value={bio}
+          onChange={(e) => onBioChange(e.target.value)}
+          rows={2}
+          className="w-full mt-1 bg-cream/50 rounded-2xl border border-brown-900/10 p-3 text-xs text-brown-900 font-bold focus:outline-none"
+        />
+      </div>
+    </div>
+  );
+}
+
+function SettingsToggles({
+  commStyle,
+  onCommStyleChange,
+  notifChatbot,
+  onNotifChatbotChange,
+  notifWellness,
+  onNotifWellnessChange,
+  notifCommunity,
+  onNotifCommunityChange,
+  fingerprintEnabled,
+  onFingerprintChange,
+}: {
+  commStyle: "CASUAL" | "FORMAL" | "FUN";
+  onCommStyleChange: (v: "CASUAL" | "FORMAL" | "FUN") => void;
+  notifChatbot: boolean;
+  onNotifChatbotChange: (v: boolean) => void;
+  notifWellness: boolean;
+  onNotifWellnessChange: (v: boolean) => void;
+  notifCommunity: boolean;
+  onNotifCommunityChange: (v: boolean) => void;
+  fingerprintEnabled: boolean;
+  onFingerprintChange: (v: boolean) => void;
+}) {
+  return (
+    <div className="lg:col-span-5 flex flex-col gap-6">
+      <div className="glass-card rounded-3xl p-6 border border-brown-900/10 flex flex-col gap-4 bg-white">
+        <h3 className="font-display text-base font-bold text-brown-900 border-b border-brown-900/10 pb-2">
+          2. Preferensi Zyba Companion
+        </h3>
+
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-bold text-brown-900">Gaya Bahasa AI Chatbot:</label>
+          {(["CASUAL", "FORMAL", "FUN"] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => onCommStyleChange(s)}
+              className={`p-3 rounded-2xl text-xs font-bold border transition-colors flex items-center justify-between ${
+                commStyle === s
+                  ? "bg-brown-900 text-white border-brown-900"
+                  : "bg-cream text-brown-900 border-brown-900/10 hover:border-orange-500"
+              }`}
+            >
+              <span>{s}</span>
+              {commStyle === s && <span>✓</span>}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="glass-card rounded-3xl p-6 border border-brown-900/10 flex flex-col gap-4 bg-white">
+        <h3 className="font-display text-base font-bold text-brown-900 border-b border-brown-900/10 pb-2">
+          3. Keamanan & Notifikasi
+        </h3>
+
+        <div className="flex flex-col gap-3 text-xs text-brown-900">
+          <label className="flex items-center justify-between cursor-pointer">
+            <span>Otensifikasi Biometrik / Fingerprint</span>
+            <input
+              type="checkbox"
+              checked={fingerprintEnabled}
+              onChange={(e) => onFingerprintChange(e.target.checked)}
+              className="accent-green-500"
+            />
+          </label>
+          <label className="flex items-center justify-between cursor-pointer">
+            <span>Notifikasi Chat Companion</span>
+            <input
+              type="checkbox"
+              checked={notifChatbot}
+              onChange={(e) => onNotifChatbotChange(e.target.checked)}
+              className="accent-green-500"
+            />
+          </label>
+          <label className="flex items-center justify-between cursor-pointer">
+            <span>Pengingat Mood Check-In & Tidur</span>
+            <input
+              type="checkbox"
+              checked={notifWellness}
+              onChange={(e) => onNotifWellnessChange(e.target.checked)}
+              className="accent-green-500"
+            />
+          </label>
+          <label className="flex items-center justify-between cursor-pointer">
+            <span>Notifikasi Aktivitas Komunitas</span>
+            <input
+              type="checkbox"
+              checked={notifCommunity}
+              onChange={(e) => onNotifCommunityChange(e.target.checked)}
+              className="accent-green-500"
+            />
+          </label>
         </div>
       </div>
     </div>
