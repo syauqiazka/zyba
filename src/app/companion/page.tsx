@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { CRISIS_RESOURCES } from "@/backend/crisis/crisisDetection";
 import { AIModelType } from "@/backend/ai/aiModelManager";
 import ConversationList from "./components/ConversationList";
 import ChatHeader from "./components/ChatHeader";
 import ChatMessages from "./components/ChatMessages";
 import ChatInput from "./components/ChatInput";
 import ModelSelector from "./components/ModelSelector";
-import CrisisModal from "./components/CrisisModal";
+import CrisisBanner from "./components/CrisisBanner";
 
 interface Message {
   id: string;
@@ -34,7 +33,7 @@ const INITIAL_CONVERSATIONS: Conversation[] = [
     title: "Overthinking Seputar Tugas Akhir",
     lastMsg: "Terima kasih Zyba, latihan pernapasan tadi sangat membantu fokusku.",
     time: "10:45 AM",
-    emotionTag: "Calming",
+    emotionTag: "Tenang",
     messages: [
       {
         id: "m-1",
@@ -63,7 +62,7 @@ const INITIAL_CONVERSATIONS: Conversation[] = [
     title: "Evaluasi Kualitas Tidur Minggu Ini",
     lastMsg: "Cobalah mematikan gadget 30 menit sebelum tidur ya.",
     time: "Kemarin",
-    emotionTag: "Reflective",
+    emotionTag: "Reflektif",
     messages: [
       {
         id: "m-4",
@@ -92,7 +91,7 @@ export default function CompanionPage() {
   const [selectedModel, setSelectedModel] = useState<AIModelType>("gemini-1.5-flash");
   const [isSending, setIsSending] = useState(false);
 
-  // Modals
+  // Modals & Banners
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showProModal, setShowProModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -109,12 +108,12 @@ export default function CompanionPage() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [activeConv?.messages]);
+  }, [activeConv?.messages, isSending]);
 
-  const handleSendMessage = async () => {
-    if (!inputText.trim() || isSending) return;
+  const handleSendMessage = async (customText?: string) => {
+    const textToSend = (customText || inputText).trim();
+    if (!textToSend || isSending) return;
 
-    const userMsgText = inputText.trim();
     setInputText("");
     setIsSending(true);
 
@@ -122,16 +121,18 @@ export default function CompanionPage() {
     const newUserMsg: Message = {
       id: `m-${Date.now()}`,
       role: "USER",
-      content: userMsgText,
+      content: textToSend,
       time: timeNow,
     };
 
     setConversations((prev) =>
       prev.map((c) => {
         if (c.id === activeConvId) {
+          const isFirstMessage = c.messages.length === 0;
           return {
             ...c,
-            lastMsg: userMsgText,
+            title: isFirstMessage ? textToSend.slice(0, 32) : c.title,
+            lastMsg: textToSend,
             time: "Baru saja",
             messages: [...c.messages, newUserMsg],
           };
@@ -141,12 +142,11 @@ export default function CompanionPage() {
     );
 
     try {
-      // Fetch response from Backend API route with Selected AI Model
       const res = await fetch("/api/companion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: userMsgText,
+          message: textToSend,
           model: selectedModel,
           communicationStyle: commStyle,
           history: activeConv?.messages.map((m) => ({ role: m.role, content: m.content })),
@@ -155,6 +155,7 @@ export default function CompanionPage() {
 
       const data = await res.json();
 
+      // 10.5 Banner krisis jika detectRisk terpicu
       if (data.isRisk) {
         setCrisisAlert(true);
       }
@@ -162,7 +163,7 @@ export default function CompanionPage() {
       const newBotMsg: Message = {
         id: `m-${Date.now() + 1}`,
         role: "ASSISTANT",
-        content: data.reply || "Maaf, Zyba sedang memproses data.",
+        content: data.reply || "Terima kasih sudah berbagi. Zyba di sini mendengarkan ceritamu.",
         flaggedForRisk: data.isRisk,
         modelUsed: data.modelUsed || selectedModel,
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
@@ -173,8 +174,8 @@ export default function CompanionPage() {
           if (c.id === activeConvId) {
             return {
               ...c,
-              lastMsg: data.reply || userMsgText,
-              emotionTag: data.emotionTag || c.emotionTag,
+              lastMsg: data.reply || textToSend,
+              emotionTag: data.emotionTag || c.emotionTag || "Tenang",
               messages: [...c.messages, newBotMsg],
             };
           }
@@ -193,18 +194,10 @@ export default function CompanionPage() {
     const newChat: Conversation = {
       id: newId,
       title: "Percakapan Baru",
-      lastMsg: "Halo! Ada yang ingin kamu ceritakan?",
+      lastMsg: "Belum ada pesan",
       time: "Baru saja",
-      emotionTag: "Neutral",
-      messages: [
-        {
-          id: `m-${Date.now()}`,
-          role: "ASSISTANT",
-          content: "Halo Alex! Aku Zyba Companion. Bagaimana perasaanmu hari ini? Ceritakan apa saja yang mengganggu pikiranmu.",
-          modelUsed: selectedModel,
-          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        },
-      ],
+      emotionTag: "Tenang",
+      messages: [], // Empty state (10.3) dengan prompt starter
     };
 
     setConversations([newChat, ...conversations]);
@@ -212,49 +205,67 @@ export default function CompanionPage() {
   };
 
   const handleDeleteChat = () => {
-    setConversations(conversations.filter((c) => c.id !== activeConvId));
-    setShowDeleteModal(false);
-    if (conversations.length > 1) {
-      setActiveConvId(conversations[0].id);
+    const remaining = conversations.filter((c) => c.id !== activeConvId);
+    if (remaining.length === 0) {
+      const freshChat: Conversation = {
+        id: `conv-${Date.now()}`,
+        title: "Percakapan Baru",
+        lastMsg: "Belum ada pesan",
+        time: "Baru saja",
+        emotionTag: "Tenang",
+        messages: [],
+      };
+      setConversations([freshChat]);
+      setActiveConvId(freshChat.id);
+    } else {
+      setConversations(remaining);
+      setActiveConvId(remaining[0].id);
     }
+    setShowDeleteModal(false);
   };
 
   return (
-    <div className="flex flex-col gap-4 h-[calc(100vh-5rem)]">
+    <div className="flex flex-col gap-4 h-[calc(100vh-6rem)] min-h-[600px]">
       {/* Page Header with Multi-Model AI Selector */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
         <div>
           <h1 className="font-display text-2xl font-extrabold text-brown-900 flex items-center gap-2">
-            Zyba Companion <span className="text-xs bg-orange-500 text-white font-bold px-2 py-0.5 rounded-full">Multi-Model AI</span>
+            Zyba Companion{" "}
+            <span className="text-xs bg-orange-500 text-white font-bold px-2.5 py-0.5 rounded-full">
+              Multi-Model AI
+            </span>
           </h1>
           <p className="text-xs text-brown-700">
-            Pilih model kecerdasan buatan favoritmu untuk pengalaman konsultasi emosional yang dipersonalisasi.
+            Pendamping emosional cerdas untuk mendengarkan curhat, memberi insight, dan membantu menenangkan pikiran.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <ModelSelector
             selectedModel={selectedModel}
             setSelectedModel={setSelectedModel}
           />
 
           <button
+            type="button"
             onClick={() => setShowSettingsModal(true)}
-            className="px-3.5 py-1.5 rounded-full border border-brown-900/10 bg-white text-xs font-bold text-brown-700 hover:bg-cream transition-colors flex items-center gap-1.5"
+            className="px-3.5 py-2 rounded-full border border-brown-900/15 bg-white text-xs font-bold text-brown-700 hover:bg-cream transition-colors flex items-center gap-1.5 shadow-xs"
           >
-            ⚙️ Style: {commStyle}
+            ⚙️ Gaya: {commStyle}
           </button>
           <button
+            type="button"
             onClick={() => setShowProModal(true)}
-            className="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-orange-500 to-orange-400 text-white text-xs font-bold shadow-sm hover:opacity-95 transition-opacity"
+            className="px-4 py-2 rounded-full bg-orange-500 text-white text-xs font-bold shadow-sm hover:opacity-95 transition-opacity"
           >
-            ⚡ Upgrade Pro
+            ⚡ Zyba Plus
           </button>
         </div>
       </div>
 
-      {/* Main 2-Panel Chat Layout */}
-      <div className="flex-1 grid grid-cols-12 gap-6 bg-white/80 rounded-3xl border border-brown-900/10 overflow-hidden shadow-sm backdrop-blur-md">
+      {/* 10.1 Main 2-Panel Chat Layout */}
+      <div className="flex-1 flex flex-col lg:flex-row bg-white rounded-3xl border border-brown-900/10 overflow-hidden shadow-sm min-h-0">
+        {/* Left Panel: Conversation List (≈320px fixed) */}
         <ConversationList
           conversations={conversations}
           activeConvId={activeConvId}
@@ -265,26 +276,35 @@ export default function CompanionPage() {
           selectedModel={selectedModel}
         />
 
-        {/* Right Panel: Active Chat Interface */}
-        <div className="col-span-8 flex flex-col justify-between bg-white">
+        {/* Right Panel (flex-1): Active Chat Window */}
+        <div className="flex-1 flex flex-col justify-between bg-white min-w-0">
           <ChatHeader
             activeConv={activeConv}
             selectedModel={selectedModel}
             commStyle={commStyle}
+            setShowSettingsModal={setShowSettingsModal}
             setShowDeleteModal={setShowDeleteModal}
           />
 
+          {/* 10.5 Banner Krisis Tenang (di atas jendela chat, tidak auto-dismiss) */}
+          {crisisAlert && (
+            <CrisisBanner onClose={() => setCrisisAlert(false)} />
+          )}
+
+          {/* 10.2 Bubble Chat & 10.3 Empty/Intro State */}
           <ChatMessages
-            messages={activeConv.messages}
+            messages={activeConv?.messages || []}
             isSending={isSending}
             selectedModel={selectedModel}
             messagesEndRef={messagesEndRef}
+            onSelectPromptStarter={(prompt) => handleSendMessage(prompt)}
           />
 
+          {/* 10.4 Sticky Rounded-Pill Input Area */}
           <ChatInput
             inputText={inputText}
             setInputText={setInputText}
-            handleSendMessage={handleSendMessage}
+            handleSendMessage={() => handleSendMessage()}
             isSending={isSending}
             isVoiceActive={isVoiceActive}
             setIsVoiceActive={setIsVoiceActive}
@@ -293,22 +313,29 @@ export default function CompanionPage() {
         </div>
       </div>
 
-      {/* CRISIS ALERT MODAL */}
-      <CrisisModal crisisAlert={crisisAlert} setCrisisAlert={setCrisisAlert} />
-
-      {/* SETTINGS MODAL */}
+      {/* 10.1 Settings Modal */}
       {showSettingsModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-7 max-w-sm w-full shadow-2xl border border-brown-900/10 flex flex-col gap-5">
-            <h3 className="font-display font-extrabold text-base text-brown-900">
-              Pengaturan Zyba Companion
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="font-display font-extrabold text-base text-brown-900">
+                Pengaturan Zyba Companion
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowSettingsModal(false)}
+                className="text-brown-700 hover:text-brown-900 text-sm"
+              >
+                ✕
+              </button>
+            </div>
 
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold text-brown-900">Gaya Komunikasi AI:</label>
               {(["CASUAL", "FORMAL", "FUN"] as const).map((style) => (
                 <button
                   key={style}
+                  type="button"
                   onClick={() => setCommStyle(style)}
                   className={`p-3 rounded-2xl text-xs font-bold border transition-colors flex items-center justify-between ${
                     commStyle === style
@@ -323,8 +350,9 @@ export default function CompanionPage() {
             </div>
 
             <button
+              type="button"
               onClick={() => setShowSettingsModal(false)}
-              className="w-full py-2.5 rounded-full bg-orange-500 text-white text-xs font-bold hover:bg-brown-900 transition-colors"
+              className="w-full py-2.5 rounded-pill bg-orange-500 text-white text-xs font-bold hover:bg-brown-900 transition-colors"
             >
               Simpan & Tutup
             </button>
@@ -332,67 +360,67 @@ export default function CompanionPage() {
         </div>
       )}
 
-      {/* PRO PAYWALL MODAL */}
+      {/* 10.6 State Out of Chat Limit / Upgrade Zyba Plus Modal */}
       {showProModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-orange-500/30 flex flex-col gap-5">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-orange-500 text-white font-bold flex items-center justify-center text-2xl shadow-lg shadow-orange-500/30">
-                ✨
-              </div>
-              <div>
-                <h3 className="font-display font-extrabold text-lg text-brown-900">
-                  Upgrade ke Zyba Plus
-                </h3>
-                <span className="text-xs text-orange-500 font-bold">Unlimited AI Conversations</span>
-              </div>
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-orange-100 rounded-3xl p-8 max-w-md w-full shadow-2xl border border-orange-500/20 flex flex-col items-center text-center gap-5">
+            <div className="w-14 h-14 rounded-2xl bg-orange-500 text-white font-bold flex items-center justify-center text-2xl shadow-md">
+              ⚡
             </div>
 
-            <ul className="text-xs text-brown-700 flex flex-col gap-2 bg-cream p-4 rounded-2xl">
-              <li className="flex items-center gap-2">✓ Akses seluruh model AI (GPT-4o, Claude 3.5, Gemini Pro)</li>
-              <li className="flex items-center gap-2">✓ Tanpa batasan token harian chat</li>
-              <li className="flex items-center gap-2">✓ Bebas akses semua Course & Audio Mindfulness</li>
-            </ul>
+            <div>
+              <h3 className="font-display font-extrabold text-xl text-brown-900">
+                Kuota Chat Harian Habis
+              </h3>
+              <p className="text-xs text-brown-700 mt-1 max-w-xs leading-relaxed">
+                Kamu telah mencapai batas obrolan gratis hari ini. Buka batas percakapan tanpa limit dan akses AI premium dengan Zyba Plus.
+              </p>
+            </div>
 
             <button
+              type="button"
               onClick={() => {
-                alert("Selamat! Akun ZYBA kamu kini aktif sebagai Zyba Plus.");
+                alert("Fitur Zyba Plus segera hadir!");
                 setShowProModal(false);
               }}
-              className="w-full py-3 rounded-full bg-gradient-to-r from-orange-500 to-orange-400 text-white text-xs font-bold shadow-md hover:opacity-95 transition-opacity"
+              className="w-full py-3.5 rounded-pill bg-orange-500 text-white text-xs font-bold shadow-md hover:opacity-95 transition-opacity"
             >
-              Berlangganan Rp 29.000 / Bulan →
+              Upgrade ke Zyba Plus →
             </button>
+
             <button
+              type="button"
               onClick={() => setShowProModal(false)}
-              className="text-xs font-bold text-brown-700 hover:underline text-center"
+              className="text-xs font-semibold text-brown-700 hover:text-brown-900 hover:underline"
             >
-              Lanjutkan Versi Gratis
+              Nanti saja
             </button>
           </div>
         </div>
       )}
 
-      {/* DELETE CONFIRMATION MODAL */}
+      {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-xl border border-brown-900/10 flex flex-col gap-4">
             <h3 className="font-display font-extrabold text-base text-brown-900">
               Hapus Percakapan Ini?
             </h3>
             <p className="text-xs text-brown-700">
-              Semua riwayat obrolan dalam topik ini akan dihapus secara permanen dari server.
+              Semua riwayat obrolan dalam topik ini akan dihapus secara permanen.
             </p>
             <div className="flex items-center gap-3 mt-2">
               <button
+                type="button"
                 onClick={() => setShowDeleteModal(false)}
-                className="flex-1 py-2.5 rounded-full border border-brown-900/10 text-xs font-bold text-brown-700 hover:bg-cream"
+                className="flex-1 py-2.5 rounded-pill border border-brown-900/15 text-xs font-bold text-brown-700 hover:bg-cream"
               >
                 Batal
               </button>
               <button
+                type="button"
                 onClick={handleDeleteChat}
-                className="flex-1 py-2.5 rounded-full bg-danger text-white text-xs font-bold hover:opacity-90"
+                className="flex-1 py-2.5 rounded-pill bg-danger text-white text-xs font-bold hover:opacity-90"
               >
                 Hapus →
               </button>
