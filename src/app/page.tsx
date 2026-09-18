@@ -1,8 +1,4 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
-import GoogleAuthProfileModal from "@/components/GoogleAuthProfileModal";
 
 const STATS = [
   { value: "74,9jt", label: "Total Gen Z di Indonesia" },
@@ -39,8 +35,6 @@ const FEATURES = [
 ];
 
 export default function LandingPage() {
-  const [showAuthModal, setShowAuthModal] = useState(false);
-
   return (
     <div className="min-h-screen bg-cream text-brown-900 selection:bg-orange-100 selection:text-orange-500">
       {/* Public Header */}
@@ -74,13 +68,12 @@ export default function LandingPage() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setShowAuthModal(true)}
-            className="rounded-pill bg-brown-900 text-white px-5 py-2.5 text-sm font-medium hover:bg-orange-500 transition-colors shadow-sm"
+          <Link
+            href="/login"
+            className="rounded-pill bg-brown-900 text-white px-5 py-2.5 text-sm font-medium hover:bg-orange-500 transition-colors shadow-sm inline-block"
           >
             Masuk / Daftar
-          </button>
+          </Link>
         </div>
       </header>
 
@@ -99,17 +92,16 @@ export default function LandingPage() {
           Curhat, dapat solusi, ubah jadi program nyata — semua dalam satu ruang aman, privat, dan bebas dihakimi.
         </p>
 
-        <div className="mt-8 flex flex-col sm:flex-row gap-4">
-          <button
-            type="button"
-            onClick={() => setShowAuthModal(true)}
-            className="rounded-pill bg-orange-500 text-white px-8 py-3.5 font-semibold hover:opacity-90 transition-opacity shadow-md"
+        <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center">
+          <Link
+            href="/login"
+            className="rounded-pill bg-orange-500 text-white px-8 py-3.5 font-semibold hover:opacity-90 transition-opacity shadow-md inline-block"
           >
             Mulai Sekarang →
-          </button>
+          </Link>
           <a
             href="#fitur"
-            className="rounded-pill border-2 border-brown-900/15 px-8 py-3.5 font-semibold hover:bg-white transition-colors"
+            className="rounded-pill border-2 border-brown-900/15 px-8 py-3.5 font-semibold hover:bg-white transition-colors inline-block"
           >
             Lihat Fitur
           </a>
@@ -204,21 +196,14 @@ export default function LandingPage() {
           <p className="text-sm text-brown-700 mt-3 max-w-md">
             Mulai langkah kecilmu menuju kesehatan mental, fisik, dan sosial yang lebih seimbang hari ini.
           </p>
-          <button
-            type="button"
-            onClick={() => setShowAuthModal(true)}
+          <Link
+            href="/login"
             className="inline-block mt-6 rounded-pill bg-brown-900 text-white px-8 py-3.5 font-semibold hover:opacity-90 transition-opacity shadow-md"
           >
             Gabung Gratis →
-          </button>
+          </Link>
         </div>
       </section>
-
-      {/* Modal Google Auth -> Setup Profil */}
-      <GoogleAuthProfileModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-      />
     </div>
   );
 }
