@@ -9,6 +9,87 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { action, email, otp, name, password } = body;
 
+    // Google Auth Action
+    if (action === "GOOGLE_AUTH") {
+      const googleEmail = email || "alex.rivera@gmail.com";
+      const googleName = name || "Alex Rivera";
+      const avatarUrl = body.avatarUrl || "🦊";
+
+      let user = await prisma.user.findUnique({
+        where: { email: googleEmail },
+      });
+
+      let isNewUser = false;
+      if (!user) {
+        isNewUser = true;
+        const dummyPasswordHash = await bcrypt.hash(`google_${Date.now()}_oauth`, 12);
+        user = await prisma.user.create({
+          data: {
+            email: googleEmail,
+            name: googleName,
+            passwordHash: dummyPasswordHash,
+            avatarUrl,
+            onboardingCompleted: false,
+          },
+        });
+
+        await prisma.notificationPref.create({
+          data: {
+            userId: user.id,
+            companionNotif: true,
+            wellnessNotif: true,
+            communityNotif: false,
+          },
+        });
+      }
+
+      const sessionToken = await createSessionToken({
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+      });
+
+      const response = NextResponse.json({
+        success: true,
+        user: { id: user.id, email: user.email, name: user.name, avatarUrl: user.avatarUrl },
+        token: sessionToken,
+        isNewUser,
+      });
+
+      response.cookies.set("auth-token", sessionToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+      });
+
+      return response;
+    }
+
+    // Update Profile after Setup
+    if (action === "UPDATE_PROFILE") {
+      const targetEmail = email;
+      if (!targetEmail) {
+        return NextResponse.json({ error: "Email wajib diisi" }, { status: 400 });
+      }
+
+      const updated = await prisma.user.update({
+        where: { email: targetEmail },
+        data: {
+          name: name || undefined,
+          avatarUrl: body.avatarUrl || undefined,
+          communicationStyle: body.communicationStyle || undefined,
+          onboardingCompleted: true,
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        user: updated,
+      });
+    }
+
     if (action === "SIGNUP") {
       if (!email) {
         return NextResponse.json({ error: "Email wajib diisi." }, { status: 400 });

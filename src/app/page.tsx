@@ -1,4 +1,8 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
+import GoogleAuthProfileModal from "@/components/GoogleAuthProfileModal";
 
 const STATS = [
   { value: "74,9jt", label: "Total Gen Z di Indonesia" },
@@ -35,6 +39,8 @@ const FEATURES = [
 ];
 
 export default function LandingPage() {
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
   return (
     <div className="min-h-screen bg-cream text-brown-900 selection:bg-orange-100 selection:text-orange-500">
       {/* Public Header */}
@@ -68,12 +74,13 @@ export default function LandingPage() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link
-            href="/onboarding"
+          <button
+            type="button"
+            onClick={() => setShowAuthModal(true)}
             className="rounded-pill bg-brown-900 text-white px-5 py-2.5 text-sm font-medium hover:bg-orange-500 transition-colors shadow-sm"
           >
             Masuk / Daftar
-          </Link>
+          </button>
         </div>
       </header>
 
@@ -93,12 +100,13 @@ export default function LandingPage() {
         </p>
 
         <div className="mt-8 flex flex-col sm:flex-row gap-4">
-          <Link
-            href="/onboarding"
+          <button
+            type="button"
+            onClick={() => setShowAuthModal(true)}
             className="rounded-pill bg-orange-500 text-white px-8 py-3.5 font-semibold hover:opacity-90 transition-opacity shadow-md"
           >
             Mulai Sekarang →
-          </Link>
+          </button>
           <a
             href="#fitur"
             className="rounded-pill border-2 border-brown-900/15 px-8 py-3.5 font-semibold hover:bg-white transition-colors"
@@ -196,14 +204,21 @@ export default function LandingPage() {
           <p className="text-sm text-brown-700 mt-3 max-w-md">
             Mulai langkah kecilmu menuju kesehatan mental, fisik, dan sosial yang lebih seimbang hari ini.
           </p>
-          <Link
-            href="/onboarding"
+          <button
+            type="button"
+            onClick={() => setShowAuthModal(true)}
             className="inline-block mt-6 rounded-pill bg-brown-900 text-white px-8 py-3.5 font-semibold hover:opacity-90 transition-opacity shadow-md"
           >
             Gabung Gratis →
-          </Link>
+          </button>
         </div>
       </section>
+
+      {/* Modal Google Auth -> Setup Profil */}
+      <GoogleAuthProfileModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+      />
     </div>
   );
 }

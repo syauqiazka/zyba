@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import GoogleAuthProfileModal from "@/components/GoogleAuthProfileModal";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function OnboardingPage() {
   const [selectedAvatar, setSelectedAvatar] = useState("🦊");
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [showForgotModal, setShowForgotModal] = useState(false);
+  const [showGoogleModal, setShowGoogleModal] = useState(false);
   const [otpPin, setOtpPin] = useState(["", "", "", ""]);
   const [demoOtpNotice, setDemoOtpNotice] = useState("");
   const [otpError, setOtpError] = useState("");
@@ -30,12 +32,16 @@ export default function OnboardingPage() {
   };
 
   const handleAuthSubmit = async (provider: "EMAIL" | "GOOGLE" = "EMAIL") => {
+    if (provider === "GOOGLE") {
+      setShowGoogleModal(true);
+      return;
+    }
+
     if (authTab === "SIGN_UP") {
       setIsRequestingOtp(true);
       setOtpError("");
       try {
-        const targetEmail = email || (provider === "GOOGLE" ? "user.google@gmail.com" : "alex@zyba.app");
-        if (provider === "GOOGLE") setEmail(targetEmail);
+        const targetEmail = email || "alex@zyba.app";
 
         const res = await fetch("/api/auth/otp", {
           method: "POST",
@@ -171,6 +177,10 @@ export default function OnboardingPage() {
       {showForgotModal && <ForgotPasswordModal 
         setShowForgotModal={setShowForgotModal} 
       />}
+      <GoogleAuthProfileModal
+        isOpen={showGoogleModal}
+        onClose={() => setShowGoogleModal(false)}
+      />
     </div>
   );
 }
