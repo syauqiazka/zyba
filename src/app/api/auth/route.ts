@@ -255,3 +255,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
+
+// Logout: hapus cookie auth-token
+export async function DELETE() {
+  const response = NextResponse.json({ ok: true });
+  response.cookies.set("auth-token", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0, // expire immediately
+  });
+  return response;
+}
