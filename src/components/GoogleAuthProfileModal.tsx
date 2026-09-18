@@ -110,8 +110,8 @@ export default function GoogleAuthProfileModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-brown-900/10 flex flex-col gap-5 relative animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-brown-900/35 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-cream rounded-[2rem] p-6 sm:p-8 max-w-md w-full shadow-[0_24px_80px_-28px_rgba(59,42,32,0.6)] border border-white/80 flex flex-col gap-5 relative animate-in fade-in zoom-in-95 duration-200">
         {/* Tombol Tutup */}
         <button
           type="button"

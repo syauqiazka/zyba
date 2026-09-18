@@ -32,7 +32,7 @@ export default function MoodSelector() {
   }
 
   return (
-    <div className="bg-white rounded-2xl p-8 border border-brown-900/10 max-w-xl">
+    <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 border border-brown-900/10 max-w-xl shadow-[0_18px_50px_-34px_rgba(59,42,32,0.7)]">
       <h2 className="font-display text-lg font-semibold mb-1">
         Bagaimana perasaanmu hari ini?
       </h2>
@@ -46,7 +46,7 @@ export default function MoodSelector() {
             key={m.value}
             type="button"
             onClick={() => setSelected(m.value)}
-            className={`flex-1 rounded-xl py-4 flex flex-col items-center gap-2 border-2 transition-all ${
+            className={`flex-1 rounded-2xl py-4 flex flex-col items-center gap-2 border-2 transition-all duration-300 hover:-translate-y-1 ${
               selected === m.value
                 ? `${m.colorClass} border-brown-900 text-white`
                 : "border-transparent bg-cream hover:border-brown-900/20"
