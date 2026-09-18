@@ -12,7 +12,7 @@ export default function LoginPage() {
       {/* Tombol Kembali */}
       <button
         type="button"
-        onClick={() => router.back()}
+        onClick={() => router.push("/")}
         className="absolute top-5 left-6 z-50 flex items-center gap-1.5 px-4 py-2 rounded-full bg-cream border border-brown-900/15 text-brown-700 text-xs font-bold hover:bg-white hover:text-brown-900 transition-colors shadow-sm"
       >
         <svg
