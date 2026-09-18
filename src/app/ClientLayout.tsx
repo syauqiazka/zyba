@@ -1,10 +1,8 @@
 "use client";
 
 import { Suspense } from "react";
-import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
-import OnboardingPage from "@/app/onboarding/page";
 
 function SidebarSkeleton() {
   return (
@@ -48,43 +46,10 @@ function PageLoadingFallback() {
   );
 }
 
-const PROTECTED_PATHS = [
-  "/dashboard",
-  "/wellness-journey",
-  "/mood-check-in",
-  "/activity",
-  "/companion",
-  "/community",
-  "/resources",
-  "/assessment",
-  "/settings",
-];
-
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
-  const [isAuth, setIsAuth] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const pathname = usePathname();
 
-  const isProtected = PROTECTED_PATHS.some((path) => pathname.startsWith(path));
-
-  useEffect(() => {
-    const token = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("auth-token="));
-    setIsAuth(!!token);
-    setIsLoading(false);
-  }, [pathname]);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">Loading...</div>
-    );
-  }
-
-  if (isProtected && !isAuth) {
-    return <OnboardingPage />;
-  }
-
+  // Public pages (landing page, login, onboarding) render full without sidebar
   if (pathname === "/" || pathname === "/onboarding" || pathname === "/login") {
     return (
       <Suspense fallback={<PageLoadingFallback />}>
@@ -93,6 +58,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     );
   }
 
+  // Protected and internal app pages (dashboard, companion, community, dll) render with Sidebar
   return (
     <div className="flex">
       <Suspense fallback={<SidebarSkeleton />}>

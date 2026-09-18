@@ -29,8 +29,8 @@ export async function middleware(request: NextRequest) {
     const token = request.cookies.get("auth-token");
 
     if (!token || !token.value) {
-      // Redirect to onboarding if not authenticated
-      const url = new URL("/onboarding", request.url);
+      // Redirect to /login if not authenticated
+      const url = new URL("/login", request.url);
       url.searchParams.set("redirected", "true");
       return NextResponse.redirect(url);
     }
@@ -38,8 +38,8 @@ export async function middleware(request: NextRequest) {
     // Verify signed JWT session token (AGENTS.md Bagian 8.2)
     const session = await verifySessionToken(token.value);
     if (!session) {
-      // Token tidak valid atau kedaluwarsa, hapus cookie dan redirect ke login
-      const url = new URL("/onboarding", request.url);
+      // Token tidak valid atau kedaluwarsa, hapus cookie dan redirect ke /login
+      const url = new URL("/login", request.url);
       url.searchParams.set("redirected", "true");
       const response = NextResponse.redirect(url);
       response.cookies.delete("auth-token");

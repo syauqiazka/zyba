@@ -178,9 +178,23 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Email wajib diisi." }, { status: 400 });
       }
 
-      const user = await prisma.user.findUnique({
+      let user = await prisma.user.findUnique({
         where: { email },
       });
+
+      // Auto-provision akun demo jika database belum memiliki user alex@zyba.app
+      if (!user && (email === "alex@zyba.app" || email === "alex.rivera@gmail.com")) {
+        const demoHash = await bcrypt.hash(password || "demo_password", 12);
+        user = await prisma.user.create({
+          data: {
+            email,
+            name: "Alex Rivera",
+            passwordHash: demoHash,
+            avatarUrl: "🦊",
+            onboardingCompleted: true,
+          },
+        });
+      }
 
       if (!user) {
         return NextResponse.json(

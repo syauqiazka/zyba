@@ -119,7 +119,7 @@ export default function ProfileSecurityFlow({
     } catch {
       // Ignore network issue in demo
     }
-    router.push("/dashboard");
+    window.location.href = "/dashboard";
   };
 
   return (

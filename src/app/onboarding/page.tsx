@@ -49,7 +49,7 @@ function OnboardingContent() {
 
       const data = await res.json();
       if (res.ok) {
-        router.push("/dashboard");
+        window.location.href = "/dashboard";
       } else {
         setLoginError(data.error || "Email atau password salah.");
         alert(data.error || "Gagal masuk. Periksa kembali email dan password.");
