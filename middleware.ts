@@ -11,6 +11,7 @@ const PROTECTED_PATHS = [
   "/resources",
   "/assessment",
   "/settings",
+  "/welcome",
 ];
 
 export async function middleware(request: NextRequest) {
