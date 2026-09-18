@@ -85,7 +85,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     return <OnboardingPage />;
   }
 
-  if (pathname === "/") {
+  if (pathname === "/" || pathname === "/onboarding" || pathname === "/login") {
     return (
       <Suspense fallback={<PageLoadingFallback />}>
         {children}

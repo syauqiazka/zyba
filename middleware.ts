@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Allow access to public paths
-  if (pathname === "/" || pathname === "/onboarding") {
+  if (pathname === "/" || pathname === "/onboarding" || pathname === "/login") {
     return NextResponse.next();
   }
 
