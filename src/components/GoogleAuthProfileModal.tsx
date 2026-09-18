@@ -11,14 +11,14 @@ interface GoogleAuthProfileModalProps {
 }
 
 const AVATAR_OPTIONS = [
-  { emoji: "🦊", label: "Rubah" },
-  { emoji: "🐼", label: "Panda" },
-  { emoji: "🦁", label: "Singa" },
-  { emoji: "🐰", label: "Kelinci" },
-  { emoji: "🐯", label: "Harimau" },
-  { emoji: "🦉", label: "Burung Hantu" },
-  { emoji: "🐨", label: "Koala" },
-  { emoji: "🦄", label: "Unicorn" },
+ { emoji: "AL", label: "Alex" },
+ { emoji: "NA", label: "Naya" },
+ { emoji: "RA", label: "Raka" },
+ { emoji: "SA", label: "Safa" },
+ { emoji: "DI", label: "Dimas" },
+ { emoji: "KA", label: "Karin" },
+ { emoji: "JO", label: "Jovan" },
+ { emoji: "MI", label: "Mira" },
 ];
 
 export default function GoogleAuthProfileModal({
@@ -274,11 +274,12 @@ export default function GoogleAuthProfileModal({
               </label>
               <div className="grid grid-cols-4 gap-2">
                 {AVATAR_OPTIONS.map((item) => (
-                  <button
-                    key={item.emoji}
-                    type="button"
-                    onClick={() => setAvatar(item.emoji)}
-                    className={`p-2.5 rounded-2xl text-2xl flex flex-col items-center justify-center gap-1 border transition-all ${
+  <button
+                key={item.emoji}
+                type="button"
+                onClick={() => setAvatar(item.emoji)}
+                aria-label={`Pilih avatar ${item.label}`}
+                className={`p-2.5 rounded-2xl text-sm flex flex-col items-center justify-center gap-1 border transition-all ${
                       avatar === item.emoji
                         ? "bg-orange-100 border-orange-500 scale-105 shadow-xs"
                         : "bg-cream/40 border-brown-900/10 hover:bg-cream"

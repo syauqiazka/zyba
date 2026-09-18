@@ -78,7 +78,11 @@ export default function Sidebar() {
       <div className="flex flex-col gap-3 pt-4 border-t border-brown-900/10">
         <div className="bg-white/70 rounded-xl p-3 flex items-center justify-between border border-brown-900/10 transition-colors hover:bg-white">
           <div className="flex items-center gap-2">
-            <span className="text-lg">✨</span>
+            <span className="flex size-8 items-center justify-center rounded-xl bg-orange-100 text-orange-500" aria-hidden="true">
+              <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3.75l1.42 4.83a2 2 0 001.36 1.36L19.6 11.4l-4.82 1.42a2 2 0 00-1.36 1.36L12 19.02l-1.42-4.84a2 2 0 00-1.36-1.36L4.4 11.4l4.82-1.46a2 2 0 001.36-1.36L12 3.75z" />
+              </svg>
+            </span>
             <div className="flex flex-col">
               <span className="text-xs font-bold text-brown-900">Zyba Plus</span>
               <span className="text-[10px] text-brown-700">Fitur AI Unlocked</span>

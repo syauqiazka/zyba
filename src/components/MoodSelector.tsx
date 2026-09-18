@@ -3,12 +3,28 @@
 import { useState } from "react";
 
 const MOODS = [
-  { value: "DEPRESSED", label: "Depressed", emoji: "😞", colorClass: "bg-mood-depressed" },
-  { value: "SAD", label: "Sad", emoji: "🙁", colorClass: "bg-mood-sad" },
-  { value: "NEUTRAL", label: "Neutral", emoji: "😐", colorClass: "bg-mood-neutral" },
-  { value: "HAPPY", label: "Happy", emoji: "🙂", colorClass: "bg-mood-happy" },
-  { value: "OVERJOYED", label: "Overjoyed", emoji: "😄", colorClass: "bg-mood-overjoyed" },
+  { value: "DEPRESSED", label: "Depressed", colorClass: "bg-mood-depressed", icon: "cloud" },
+  { value: "SAD", label: "Sad", colorClass: "bg-mood-sad", icon: "rain" },
+  { value: "NEUTRAL", label: "Neutral", colorClass: "bg-mood-neutral", icon: "minus" },
+  { value: "HAPPY", label: "Happy", colorClass: "bg-mood-happy", icon: "sun" },
+  { value: "OVERJOYED", label: "Overjoyed", colorClass: "bg-mood-overjoyed", icon: "spark" },
 ] as const;
+
+function MoodIcon({ name }: { name: (typeof MOODS)[number]["icon"] }) {
+  const paths = {
+    cloud: "M4 16.5A4.5 4.5 0 018.5 12 5.5 5.5 0 0119 14.5a3.5 3.5 0 01-.5 7H6a4 4 0 01-2-7.5z",
+    rain: "M7 17l-1 3m6-3l-1 3m6-3l-1 3M4 14.5A4.5 4.5 0 018.5 10 5.5 5.5 0 0119 12.5a3.5 3.5 0 01-.5 7H6a4 4 0 01-2-5z",
+    minus: "M5 12h14",
+    sun: "M12 3v2m0 14v2M3 12h2m14 0h2m-3.36-6.36l-1.42 1.42M6.78 17.22l-1.42 1.42m0-13.42l1.42 1.42m10.44 10.58l1.42 1.42M16 12a4 4 0 11-8 0 4 4 0 018 0z",
+    spark: "M12 3.75l1.42 4.83a2 2 0 001.36 1.36L19.6 11.4l-4.82 1.42a2 2 0 00-1.36 1.36L12 19.02l-1.42-4.84a2 2 0 00-1.36-1.36L4.4 11.4l4.82-1.46a2 2 0 001.36-1.36L12 3.75z",
+  };
+
+  return (
+    <svg className="size-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d={paths[name]} />
+    </svg>
+  );
+}
 
 export default function MoodSelector() {
   const [selected, setSelected] = useState<string | null>(null);
@@ -52,7 +68,7 @@ export default function MoodSelector() {
                 : "border-transparent bg-cream hover:border-brown-900/20"
             }`}
           >
-            <span className="text-2xl">{m.emoji}</span>
+            <MoodIcon name={m.icon} />
             <span className="text-xs font-medium">{m.label}</span>
           </button>
         ))}
