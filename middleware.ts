@@ -1,10 +1,18 @@
-"use strict";
-
 import { NextRequest, NextResponse } from "next/server";
+import { verifySessionToken } from "@/lib/auth";
 
-const PROTECTED_PATHS = ["/dashboard", "/wellness-journey", "/mood-check-in", "/activity", "/companion", "/resources", "/assessment", "/settings"];
+const PROTECTED_PATHS = [
+  "/dashboard",
+  "/wellness-journey",
+  "/mood-check-in",
+  "/activity",
+  "/companion",
+  "/resources",
+  "/assessment",
+  "/settings",
+];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Allow access to public paths
@@ -19,23 +27,25 @@ export function middleware(request: NextRequest) {
     // Check for authentication cookie
     const token = request.cookies.get("auth-token");
 
-    if (!token) {
+    if (!token || !token.value) {
       // Redirect to onboarding if not authenticated
       const url = new URL("/onboarding", request.url);
       url.searchParams.set("redirected", "true");
       return NextResponse.redirect(url);
     }
 
-    // Verify token (optional - can add more robust auth here)
-    try {
-      // Add auth verification logic here if needed
-      return NextResponse.next();
-    } catch (error) {
-      // Invalid token, redirect to login
+    // Verify signed JWT session token (AGENTS.md Bagian 8.2)
+    const session = await verifySessionToken(token.value);
+    if (!session) {
+      // Token tidak valid atau kedaluwarsa, hapus cookie dan redirect ke login
       const url = new URL("/onboarding", request.url);
       url.searchParams.set("redirected", "true");
-      return NextResponse.redirect(url);
+      const response = NextResponse.redirect(url);
+      response.cookies.delete("auth-token");
+      return response;
     }
+
+    return NextResponse.next();
   }
 
   // For other paths, allow access

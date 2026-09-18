@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateOTP, verifyOTP } from "@/lib/emailService";
+import { generateOTP, verifyOTP, sendOTPEmail } from "@/lib/emailService";
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,13 +20,12 @@ export async function POST(req: NextRequest) {
 
     if (action === "REQUEST") {
       const generatedCode = generateOTP(email);
-      // In production: await sendOTPEmail(email, generatedCode);
+      await sendOTPEmail(email, generatedCode);
 
+      // Security: Sesuai AGENTS.md Bagian 8.3, demoCode dihapus dari response API
       return NextResponse.json({
         success: true,
         message: `Kode OTP 4 digit telah dikirimkan ke ${email} (via ${provider} Auth).`,
-        // Menyediakan demoCode untuk kemudahan pengujian di environment lokal
-        demoCode: generatedCode,
       });
     }
 

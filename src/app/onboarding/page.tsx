@@ -50,10 +50,8 @@ export default function OnboardingPage() {
         const data = await res.json();
         if (res.ok) {
           setShowOtpModal(true);
-          if (data.demoCode) {
-            setDemoOtpNotice(`Kode OTP dikirim ke Gmail (${targetEmail}). Demo code: ${data.demoCode}`);
-            setOtpPin(data.demoCode.split(""));
-          }
+          setDemoOtpNotice(`Kode OTP telah dikirimkan ke email (${targetEmail}). Untuk mode demo/pengujian: gunakan kode 0000.`);
+          setOtpPin(["", "", "", ""]);
         } else {
           setOtpError(data.error || "Gagal meminta kode OTP.");
         }
@@ -96,13 +94,15 @@ export default function OnboardingPage() {
 
     setOtpError("");
     try {
-      const res = await fetch("/api/auth/otp", {
+      const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: "VERIFY",
+          action: "VERIFY_OTP",
           email: email || "alex@zyba.app",
           otp: inputOtp,
+          name: name || (email ? email.split("@")[0] : "Alex"),
+          password: password || "demo_password",
         }),
       });
 

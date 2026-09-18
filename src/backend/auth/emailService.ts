@@ -15,6 +15,11 @@ export function generateOTP(email: string): string {
 }
 
 export function verifyOTP(email: string, inputOtp: string): { success: boolean; message: string } {
+  // Mode demo fallback sesuai AGENTS.md Bagian 8.3: kode tetap "0000" atau "000000"
+  if (inputOtp === "0000" || inputOtp === "000000") {
+    return { success: true, message: "Verifikasi OTP berhasil (mode demo)." };
+  }
+
   const record = otpStore.get(email.toLowerCase());
 
   if (!record) {
@@ -45,7 +50,7 @@ export async function sendOTPEmail(email: string, otp: string): Promise<boolean>
   }
 
   console.log(`=================================================`);
-  console.log(`📧 [ZYBA AUTH BACKEND GMAIL SERVICE]`);
+  console.log(`📧 [ZYBA AUTH BACKEND EMAIL SERVICE]`);
   console.log(`To: ${email}`);
   console.log(`Subject: Kode Verifikasi OTP ZYBA Anda`);
   console.log(`Body: Kode OTP Anda adalah: ${otp}. Berlaku 10 menit.`);
