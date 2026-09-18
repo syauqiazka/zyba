@@ -1,4 +1,4 @@
-import WelcomeTour from "@/app/welcome/components/WelcomeTour";
+import WelcomeTour from "@/app/login/components/WelcomeTour";
 
 export default function WelcomeTourPage() {
   return <WelcomeTour />;
