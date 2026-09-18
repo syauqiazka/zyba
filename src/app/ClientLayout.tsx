@@ -84,18 +84,24 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     return <OnboardingPage />;
   }
 
+  if (pathname === "/") {
+    return (
+      <Suspense fallback={<PageLoadingFallback />}>
+        {children}
+      </Suspense>
+    );
+  }
+
   return (
-    <>
-      <div className="flex">
-        <Suspense fallback={<SidebarSkeleton />}>
-          <Sidebar />
+    <div className="flex">
+      <Suspense fallback={<SidebarSkeleton />}>
+        <Sidebar />
+      </Suspense>
+      <main className="flex-1 max-w-[1280px] mx-auto px-10 py-8 min-w-0">
+        <Suspense fallback={<PageLoadingFallback />}>
+          {children}
         </Suspense>
-        <main className="flex-1 max-w-[1280px] mx-auto px-10 py-8">
-          <Suspense fallback={<PageLoadingFallback />}>
-            {children}
-          </Suspense>
-        </main>
-      </div>
-    </>
+      </main>
+    </div>
   );
 }
