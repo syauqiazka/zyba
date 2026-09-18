@@ -7,6 +7,7 @@ const PROTECTED_PATHS = [
   "/mood-check-in",
   "/activity",
   "/companion",
+  "/community",
   "/resources",
   "/assessment",
   "/settings",

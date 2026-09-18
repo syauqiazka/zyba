@@ -4,6 +4,7 @@ import { useState } from "react";
 import ComposeBox from "./components/ComposeBox";
 import PostCard, { Post } from "./components/PostCard";
 import CrisisBanner from "@/app/companion/components/CrisisBanner";
+import { detectRisk } from "@/lib/crisisDetection";
 
 const INITIAL_POSTS: Post[] = [
   {
@@ -121,7 +122,13 @@ export default function CommunityPage() {
     setFollowingPosts(updater);
   };
 
-  const handleAddComment = (postId: string, commentText: string) => {
+  const handleAddComment = async (postId: string, commentText: string) => {
+    // Safety check detectRisk for free-text comments
+    const isRisk = detectRisk(commentText);
+    if (isRisk) {
+      setShowCrisisNotice(true);
+    }
+
     const newComment = {
       id: `c-${Date.now()}`,
       author: "Alex Rivera",
@@ -146,7 +153,13 @@ export default function CommunityPage() {
     setFollowingPosts(updater);
   };
 
-  const handleAddPost = (content: string, tag: string) => {
+  const handleAddPost = async (content: string, tag: string) => {
+    // Safety check detectRisk for free-text posts
+    const isRisk = detectRisk(content);
+    if (isRisk) {
+      setShowCrisisNotice(true);
+    }
+
     const newPost: Post = {
       id: `post-${Date.now()}`,
       author: "Alex Rivera",
@@ -166,6 +179,21 @@ export default function CommunityPage() {
     setPosts([newPost, ...posts]);
     if (activeTab === "FOLLOWING") {
       setFollowingPosts([newPost, ...followingPosts]);
+    }
+
+    // Call /api/community endpoint
+    try {
+      const res = await fetch("/api/community", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, tag }),
+      });
+      const data = await res.json();
+      if (data.isRisk) {
+        setShowCrisisNotice(true);
+      }
+    } catch (err) {
+      console.warn("API Community post sync:", err);
     }
   };
 

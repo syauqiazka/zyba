@@ -77,6 +77,28 @@ export default function MoodCheckInPage() {
     setJournalContent("");
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 3000);
+
+    // Call /api/journal endpoint for server-side risk checking and DB persistence
+    try {
+      fetch("/api/journal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newEntry.title,
+          content: newEntry.content,
+          mood: newEntry.mood,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.isRisk) {
+            setCrisisAlert(true);
+          }
+        })
+        .catch((err) => console.warn("Journal API sync warning:", err));
+    } catch (err) {
+      console.warn("Journal post error:", err);
+    }
   };
 
   return (
