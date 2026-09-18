@@ -64,7 +64,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       <Suspense fallback={<SidebarSkeleton />}>
         <Sidebar />
       </Suspense>
-      <main className="flex-1 max-w-[1280px] mx-auto px-10 py-8 min-w-0">
+      <main className="flex-1 max-w-[1400px] mx-auto px-6 py-6 md:px-10 md:py-8 min-w-0">
         <Suspense fallback={<PageLoadingFallback />}>
           {children}
         </Suspense>

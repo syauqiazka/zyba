@@ -27,8 +27,8 @@ const config: Config = {
         pill: "999px",
       },
       fontFamily: {
-        display: ["Montserrat", "sans-serif"],
-        body: ["Poppins", "sans-serif"],
+        display: ["Manrope", "sans-serif"],
+        body: ["DM Sans", "sans-serif"],
       },
     },
   },

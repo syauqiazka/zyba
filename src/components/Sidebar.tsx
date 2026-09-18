@@ -25,7 +25,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-64 shrink-0 border-r border-brown-900/10 bg-white/70 backdrop-blur-md min-h-screen p-6 flex flex-col justify-between sticky top-0 h-screen z-30">
+    <aside className="w-64 shrink-0 border-r border-brown-900/10 bg-white/62 backdrop-blur-xl min-h-screen p-5 flex flex-col justify-between sticky top-0 h-screen z-30 shadow-[8px_0_30px_-28px_rgba(41,35,31,0.45)]">
       <div className="flex flex-col gap-7">
         {/* Brand Logo */}
         <Link href="/dashboard" className="flex items-center gap-3 px-2 group">
@@ -55,10 +55,10 @@ export default function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`px-3.5 py-2.5 rounded-2xl text-sm font-medium transition-all flex items-center gap-3 ${
+                className={`group/link relative px-3.5 py-2.5 rounded-2xl text-sm font-medium transition-all flex items-center gap-3 ${
                   isActive
                     ? "bg-brown-900 text-cream shadow-md shadow-brown-900/10 font-semibold"
-                    : "text-brown-700 hover:bg-green-100/60 hover:text-brown-900"
+                    : "text-brown-700 hover:-translate-y-0.5 hover:bg-gradient-to-r hover:from-orange-100/80 hover:to-green-100/80 hover:text-brown-900 hover:shadow-sm"
                 }`}
               >
                 <RenderIcon name={item.icon} isActive={isActive} />
